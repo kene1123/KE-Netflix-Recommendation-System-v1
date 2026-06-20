@@ -1,0 +1,85 @@
+name: Clean & TMDB Sync
+
+on:
+  schedule:
+    # Runs once a week on Monday at 03:37 AM UTC
+    - cron: "37 3 * * 1"
+
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run mode"
+        required: true
+        default: full
+        type: choice
+        options:
+          - full          # clean + poster fetch + new movies
+          - clean-only    # text cleaning only, no TMDB calls
+          - tmdb-only     # poster fetch + new movies only
+          - audit         # report special chars, no writes
+      new_movies_days:
+        description: "Days back for new-movie sync (full mode only)"
+        required: false
+        default: "7"
+      poster_limit:
+        description: "Max poster fetches this run (blank = all)"
+        required: false
+        default: ""
+
+jobs:
+  clean-and-sync:
+    name: Clean & Sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 120      
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve CLI flags
+        id: flags
+        run: |
+          # Use manual inputs if triggered manually, otherwise fall back to weekly defaults
+          MODE="${{ github.event.inputs.mode || 'full' }}"
+          DAYS="${{ github.event.inputs.new_movies_days || '7' }}"
+          LIMIT="${{ github.event.inputs.poster_limit }}"
+
+          FLAGS=""
+          case "$MODE" in
+            clean-only) FLAGS="--clean-only" ;;
+            tmdb-only)  FLAGS="--tmdb-only" ;;
+            audit)      FLAGS="--audit --clean-only" ;;
+            full)       FLAGS="--new-movies-days $DAYS" ;;
+          esac
+
+          [ -n "$LIMIT" ] && FLAGS="$FLAGS --poster-limit $LIMIT"
+
+          echo "flags=$FLAGS" >> "$GITHUB_OUTPUT"
+          echo "Running with: python -m pipelines.clean_and_sync $FLAGS"
+
+      - name: Run pipeline
+        env:
+          DB_HOST:      ${{ secrets.DB_HOST }}
+          DB_PORT:      ${{ secrets.DB_PORT }}
+          DB_NAME:      ${{ secrets.DB_NAME }}
+          DB_USER:      ${{ secrets.DB_USER }}
+          DB_PASSWORD:  ${{ secrets.DB_PASSWORD }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: python -m pipelines.clean_and_sync ${{ steps.flags.outputs.flags }}
+
+      - name: Upload log
+        if: always()           # Guaranteed execution even if the pipeline crashes
+        uses: actions/upload-artifact@v4
+        with:
+          name: clean-sync-log-${{ github.run_id }}
+          path: logs/clean_and_sync.log
+          retention-days: 30

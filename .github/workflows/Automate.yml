@@ -1,0 +1,75 @@
+name: Recommendation Pipeline
+
+on:
+  schedule:
+    - cron: "0 3 * * 2-6"    # Daily Tue-Sat 03:00 UTC — collab + hybrid refresh
+    - cron: "0 4 * * 1"       # Weekly Monday 04:00 UTC — full recompute incl. content
+
+  workflow_dispatch:
+    inputs:
+      run_type:
+        description: "Run type"
+        required: true
+        default: daily
+        type: choice
+        options:
+          - daily       # collab + hybrid only
+          - weekly      # content + collab + hybrid
+      events_per_user:
+        description: "New events per active user"
+        required: false
+        default: "10"
+
+jobs:
+  automate:
+    name: Recommendation Refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve run flags
+        id: flags
+        run: |
+          SCHEDULE="${{ github.event.schedule }}"
+          MODE="${{ github.event.inputs.run_type || 'daily' }}"
+          EVENTS="${{ github.event.inputs.events_per_user || '10' }}"
+
+          # Weekly schedule or manual weekly selection
+          if [ "$SCHEDULE" = "0 4 * * 1" ] || [ "$MODE" = "weekly" ]; then
+            FLAGS="--full --run-type weekly --events-per-user $EVENTS"
+          else
+            FLAGS="--run-type daily --events-per-user $EVENTS"
+          fi
+
+          echo "flags=$FLAGS" >> "$GITHUB_OUTPUT"
+          echo "Running: python -m pipelines.automate $FLAGS"
+
+      - name: Run automation pipeline
+        env:
+          DB_HOST:      ${{ secrets.DB_HOST }}
+          DB_PORT:      ${{ secrets.DB_PORT }}
+          DB_NAME:      ${{ secrets.DB_NAME }}
+          DB_USER:      ${{ secrets.DB_USER }}
+          DB_PASSWORD:  ${{ secrets.DB_PASSWORD }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: python -m pipelines.automate ${{ steps.flags.outputs.flags }}
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automate-log-${{ github.run_id }}
+          path: logs/automate.log
+          retention-days: 30

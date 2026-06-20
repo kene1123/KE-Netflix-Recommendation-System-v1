@@ -1,0 +1,43 @@
+# Environment & secrets
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+
+# Data — keep raw inputs out, processed/cache stays local
+data/processed/*.pkl
+data/external/
+
+# Logs
+logs/
+*.log
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Pickled models / large binaries (rebuilt by pipelines, not committed)
+*.pkl
+*.pickle
+
+# Distribution / packaging
+build/
+dist/
+*.egg
