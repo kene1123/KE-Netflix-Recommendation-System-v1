@@ -8,12 +8,12 @@ CUSTOM_CSS = """
     --bg-card:      #1C1C24;
     --bg-card-hover:#23232D;
     --gold:         #D4AF6A;
-    --gold-dim:     #8A7140;
-    --steel-blue:   #5B8AC9;
-    --text-primary: #EDEAE3;
-    --text-secondary: #8A8A95;
-    --text-tertiary:#55555E;
-    --border:       #26262F;
+    --gold-dim:     #C9A05E;
+    --steel-blue:   #7BA3D9;
+    --text-primary: #F5F3EE;
+    --text-secondary: #B8B8C2;
+    --text-tertiary: #8C8C96;
+    --border:       #34343F;
     --success:      #6FBF8B;
 }
 
@@ -28,7 +28,41 @@ html, body, [class*="css"] {
                 var(--bg-base);
 }
 
-#MainMenu, footer, header {visibility: hidden;}
+#MainMenu, footer {visibility: hidden;}
+
+/* Keep header visible (it holds the sidebar collapse/expand control) but
+   make it blend with the dark theme instead of showing Streamlit's default white bar */
+header[data-testid="stHeader"] {
+    background-color: var(--bg-base) !important;
+    box-shadow: none !important;
+}
+
+/* Sidebar collapse/expand arrow — make it clearly visible at all times,
+   in both collapsed and expanded states, on desktop and mobile */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"] {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--gold-dim) !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 999999 !important;
+}
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="collapsedControl"] svg {
+    fill: var(--gold) !important;
+    color: var(--gold) !important;
+}
+[data-testid="stSidebarCollapsedControl"]:hover,
+[data-testid="collapsedControl"]:hover {
+    background-color: var(--bg-card-hover) !important;
+    border-color: var(--gold) !important;
+}
+
+/* The expand/collapse arrow inside the sidebar itself, when expanded */
+[data-testid="stSidebar"] button[kind="header"] svg {
+    fill: var(--gold) !important;
+}
 
 [data-testid="stSidebar"] {
     background-color: var(--bg-surface);
@@ -37,6 +71,32 @@ html, body, [class*="css"] {
 
 [data-testid="stSidebar"] > div:first-child {
     padding-top: 1.5rem;
+}
+
+/* Sidebar text — selectbox label, radio nav labels, captions —
+   all forced to a clearly readable tone against the dark sidebar */
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] p {
+    color: var(--text-secondary) !important;
+}
+
+[data-testid="stSidebar"] .stRadio label p {
+    color: var(--text-primary) !important;
+    font-size: 0.92rem !important;
+    font-weight: 500 !important;
+}
+
+[data-testid="stSidebar"] .stRadio [data-baseweb="radio"] label:has(input:checked) p {
+    color: var(--gold) !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox label p {
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .kn-logo {
