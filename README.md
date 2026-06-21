@@ -4,7 +4,7 @@ A full-stack hybrid recommendation engine built end to end: data pipeline, behav
 
 This is not a notebook demo. It's a production-structured system with idempotent pipelines, scheduled automation, explainable recommendations, and a deployed front end.
 
-**[Live App →](#)** *()*
+**[Live App →](#)** *(https://ke-netflix-recommendation-system-v1.streamlit.app/)*
 
 ---
 
