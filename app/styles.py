@@ -37,90 +37,31 @@ header[data-testid="stHeader"] {
     box-shadow: none !important;
 }
 
-/* Sidebar collapse/expand control — solid gold, oversized, impossible to miss,
+/* Sidebar collapse/expand arrow — make it clearly visible at all times,
    in both collapsed and expanded states, on desktop and mobile */
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="collapsedControl"] {
-    background-color: var(--gold) !important;
-    border: 2px solid var(--gold) !important;
-    border-radius: 10px !important;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--gold-dim) !important;
+    border-radius: 8px !important;
     opacity: 1 !important;
     visibility: visible !important;
     z-index: 999999 !important;
-    box-shadow: 0 2px 10px rgba(212,175,106,0.45) !important;
-    width: 42px !important;
-    height: 42px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
 }
 [data-testid="stSidebarCollapsedControl"] svg,
 [data-testid="collapsedControl"] svg {
-    fill: #0A0A0C !important;
-    color: #0A0A0C !important;
-    width: 22px !important;
-    height: 22px !important;
+    fill: var(--gold) !important;
+    color: var(--gold) !important;
 }
 [data-testid="stSidebarCollapsedControl"]:hover,
 [data-testid="collapsedControl"]:hover {
-    background-color: #E8C988 !important;
-    box-shadow: 0 2px 16px rgba(212,175,106,0.7) !important;
-    transform: scale(1.05);
+    background-color: var(--bg-card-hover) !important;
+    border-color: var(--gold) !important;
 }
 
-/* The collapse arrow inside the sidebar itself, when expanded — same treatment */
-[data-testid="stSidebar"] button[kind="header"] {
-    background-color: var(--gold) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 2px 8px rgba(212,175,106,0.4) !important;
-}
+/* The expand/collapse arrow inside the sidebar itself, when expanded */
 [data-testid="stSidebar"] button[kind="header"] svg {
-    fill: #0A0A0C !important;
-    color: #0A0A0C !important;
-}
-[data-testid="stSidebar"] button[kind="header"]:hover {
-    background-color: #E8C988 !important;
-}
-
-/* ── Top-right header bar — Netflix-style profile chip ──────────────────── */
-.kn-topbar {
-    position: fixed;
-    top: 0.55rem;
-    right: 1.2rem;
-    z-index: 999998;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-.kn-topbar-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold) 0%, #B8924A 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #0A0A0C;
-    border: 2px solid var(--bg-base);
-    box-shadow: 0 0 0 2px var(--gold-dim);
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.kn-topbar-avatar:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 0 2px var(--gold);
-}
-.kn-topbar-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    display: none;
-}
-@media (min-width: 768px) {
-    .kn-topbar-label { display: inline-block; }
+    fill: var(--gold) !important;
 }
 
 [data-testid="stSidebar"] {

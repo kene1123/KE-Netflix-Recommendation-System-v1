@@ -18,25 +18,15 @@ st.set_page_config(
 
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-users_df = db.get_user_list()
-user_options = users_df["user_id"].tolist()
-
-if "user_id" not in st.session_state:
-    st.session_state.user_id = user_options[0] if user_options else 1
-
-# ── Top-right profile chip (Netflix-style) ──────────────────────────────
-_profile_preview = db.get_user_profile(st.session_state.user_id)
-_initials = f"U{st.session_state.user_id}"
-st.markdown(f"""
-    <div class="kn-topbar">
-        <span class="kn-topbar-label">User {st.session_state.user_id} · {(_profile_preview.get('personality') or '').title()}</span>
-        <div class="kn-topbar-avatar" title="User {st.session_state.user_id}">{_initials}</div>
-    </div>
-""", unsafe_allow_html=True)
-
 # ── Sidebar ──────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown('<div class="kn-logo">KE<span>·</span>NETFLIX</div>', unsafe_allow_html=True)
+
+    users_df = db.get_user_list()
+    user_options = users_df["user_id"].tolist()
+
+    if "user_id" not in st.session_state:
+        st.session_state.user_id = user_options[0] if user_options else 1
 
     selected_user = st.selectbox(
         "Viewing as",
@@ -49,8 +39,8 @@ with st.sidebar:
     profile = db.get_user_profile(selected_user)
     if profile:
         st.markdown(f"""
-            <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem; line-height:1.6;">
-                Personality &nbsp;<b style="color:var(--gold);">{profile.get('personality','—').title()}</b><br>
+            <div style="font-size:0.78rem; color:#8A8A95; margin-top:0.4rem; line-height:1.6;">
+                Personality &nbsp;<b style="color:#D4AF6A;">{profile.get('personality','—').title()}</b><br>
                 Top genres &nbsp;{(profile.get('preferred_genres') or '—').replace('|', ', ')}
             </div>
         """, unsafe_allow_html=True)
