@@ -1,9 +1,15 @@
 name: Recommendation Pipeline
 
 on:
+  # Daily collab + hybrid refresh — independent of clean_and_sync
   schedule:
-    - cron: "0 3 * * 2-6"    # Daily Tue-Sat 03:00 UTC — collab + hybrid refresh
-    - cron: "0 4 * * 1"       # Weekly Monday 04:00 UTC — full recompute incl. content
+    - cron: "0 3 * * 2-6"    # Tue-Sat 03:00 UTC
+
+  # Weekly full recompute — triggers only AFTER clean_and_sync succeeds,
+  # removing reliance on a fixed time gap between the two workflows
+  workflow_run:
+    workflows: ["Clean & TMDB Sync"]
+    types: [completed]
 
   workflow_dispatch:
     inputs:
@@ -25,6 +31,10 @@ jobs:
     name: Recommendation Refresh
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # Skip entirely if triggered by a failed clean_and_sync run
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
 
     steps:
       - name: Checkout
@@ -42,19 +52,19 @@ jobs:
       - name: Resolve run flags
         id: flags
         run: |
-          SCHEDULE="${{ github.event.schedule }}"
+          EVENT="${{ github.event_name }}"
           MODE="${{ github.event.inputs.run_type || 'daily' }}"
           EVENTS="${{ github.event.inputs.events_per_user || '10' }}"
 
-          # Weekly schedule or manual weekly selection
-          if [ "$SCHEDULE" = "0 4 * * 1" ] || [ "$MODE" = "weekly" ]; then
+          # workflow_run (triggered after clean_and_sync) always does a full weekly recompute
+          if [ "$EVENT" = "workflow_run" ] || [ "$MODE" = "weekly" ]; then
             FLAGS="--full --run-type weekly --events-per-user $EVENTS"
           else
             FLAGS="--run-type daily --events-per-user $EVENTS"
           fi
 
           echo "flags=$FLAGS" >> "$GITHUB_OUTPUT"
-          echo "Running: python -m pipelines.automate $FLAGS"
+          echo "Trigger: $EVENT  |  Running: python -m pipelines.automate $FLAGS"
 
       - name: Run automation pipeline
         env:
